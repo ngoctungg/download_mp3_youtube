@@ -56,7 +56,7 @@ class YoutubeMp3:
         return title
     # 2 fetch video list from youtube
     def fetch_link_videos(self):
-        videos = []
+        videos = set()
         next_page_token = None
         # Because each request that get only 50 video
         # and have next page token
@@ -71,13 +71,12 @@ class YoutubeMp3:
             for video in response.get('items'):
                 id = video.get('snippet').get('resourceId').get('videoId')
                 link = "https://www.youtube.com/watch?v={}".format(id)
-                if link in videos: continue
-                videos.append(link)
+                videos.add(link)
 
             next_page_token = response.get('nextPageToken')
             if next_page_token is None:
                 break     
-        return videos
+        return list(videos)
     # 2.1 get list link is already downloaded
     def get_already_downloaded_links(self):
         if os.path.exists(f'{self.DIR}/{self.playlist_title}/links_video.txt'):
@@ -94,7 +93,7 @@ class YoutubeMp3:
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
-                'preferredquality': '320',
+                'preferredquality': '192',
             }],
             'progress_hooks':[self.my_hook],
             'outtmpl': f'{self.DIR}/{self.playlist_title}/%(title)s.%(ext)s',
